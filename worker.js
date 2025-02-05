@@ -1,13 +1,17 @@
 const { Worker } = require('bullmq');
 const IORedis = require('ioredis');
 
-// Create a Redis connection
-const connection = new IORedis();
+// Connect to Redis running in Docker
+const connection = new IORedis({
+    host: 'localhost',  // Replace with the Docker container IP if not on localhost
+    port: 6379,         // Default Redis port
+    maxRetriesPerRequest: null
+});
 
 // Simulate a timer
 const timerCheck = () => new Promise((res) => setTimeout(res, 1000));
 
-// Initialize the worker with a connection
+// Initialize the worker with the connection
 const misterWorker = new Worker(
     'email_queue',
     async (job) => {
@@ -17,5 +21,5 @@ const misterWorker = new Worker(
         console.log(`Data processed for job ID: ${job.id}`);
         console.log("done");
     },
-    { connection } // Pass the connection here
+    { connection } // Pass the connection to the worker
 );
